@@ -207,6 +207,36 @@ module.exports = {
   },
 
 
+  "test saving with format": function ( test ) {
+    test.expect( 2 );    
+
+    var entry = new this.test_model({
+      name: 'foo',
+      'theDate.nested': {
+        formatted: 'ignore me',
+        start:     '1970-01-01',
+        end:       '1970-12-31',
+      },
+    });
+
+    entry.save(function(err) {
+      test.ifError(err);
+
+      test.deepEqual(
+        entry.theDate.nested.toJSON({virtuals: true}),
+        {
+          start:     '1970-01-01T00:00:00.000Z',
+          end:       '1970-12-31T00:00:00.000Z',
+          formatted: 'Jan 1 - Dec 31, 1970',
+        },
+        "format overwritten ignored when saving"
+      );
+
+      test.done();      
+    });
+  },
+
+
 
   "test validation": function ( test ) {
 

@@ -504,6 +504,45 @@ module.exports = {
                 cb();
               });
           },
+          // Try setting a date_of_birth
+          function (cb) {
+          
+            var put_data = _.clone(document_data);
+          
+            put_data.personal_details.date_of_birth = {
+              formatted: 'This should be ignored',
+              start:     '1970-03-01',
+              end:       '1970-03-31T00:00:00Z',
+            };
+
+            rest
+              .put(
+                document_url,
+                {
+                  headers: {'Content-Type': 'application/json'},
+                  data:    JSON.stringify(put_data),
+                }
+              )
+              .on('complete', function(data, response) {
+                test.equal(response.statusCode, 200, "got 200");
+
+                var contact_detail_id  = put_data.contact_details[0]._id;
+
+                test.deepEqual(
+                  data.result.personal_details.date_of_birth,
+                  {
+                    formatted: 'FIXME',
+                    end:       '1970-03-30T00:00:00.000Z',
+                    start:     '1970-03-01T00:00:00.000Z',
+                  },
+                  "id and meta not changed"
+                );
+          
+                document_data = data.result;
+          
+                cb();
+              });
+          },
         ],
         function(err) {
           test.ifError(err, 'No errors caught');
